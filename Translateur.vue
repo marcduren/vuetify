@@ -6,6 +6,7 @@
       :style="{ width: curseur_width + 'px', left: position + 'px' }"
       @mousedown="startDrag"
       @mousemove="doDrag"
+      v-bind:value="value"
     ></v-btn>
   </div>
 </template>
@@ -29,6 +30,10 @@ export default {
     width: {
       type: Number,
       default: 290
+    },
+    max: {
+      type: Number,
+      default: 100
     }
   },
   methods: {
@@ -47,7 +52,14 @@ export default {
     },
 
     setNewCurrentPosition(e) {
-      this.position = e.clientX - this.clickpos
+      var newPos = e.clientX - this.clickpos
+      if (newPos > this.width) newPos = this.width
+      if (newPos < 0) newPos = 0
+      if (this.position !== newPos) {
+        this.position = newPos
+        this.$emit('change', Math.floor((this.position / this.width) * this.max))
+        this.$emit('input', Math.floor((this.position / this.width) * this.max))
+      }
     },
     onSliderMouseUp(e) {
       e.stopPropagation()
