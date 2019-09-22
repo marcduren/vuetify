@@ -3,7 +3,7 @@
     <v-btn
       class="grey darken-2"
       dark
-      style="height:30px;position:absolute;cursor:pointer;color:white;padding:4px;"
+      style="height:30px;position:absolute;cursor:pointer;"
       :style="{ width: curseur_width + 'px', left: position + 'px' }"
       @mousedown="startDrag"
       @mousemove="doDrag"
