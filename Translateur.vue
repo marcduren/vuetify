@@ -1,13 +1,16 @@
 <template>
-  <div class="grey lighten-1" style="height:20px;position:relative;" :max-width="width" :min-width="width">
+  <div class="grey lighten-2" style="height:32px;position:relative;" :style="{ width: width + 'px' }">
     <v-btn
       class="grey darken-2"
-      style="height:20px;position:absolute;"
+      dark
+      style="height:30px;position:absolute;cursor:pointer;color:white;padding:4px;"
       :style="{ width: curseur_width + 'px', left: position + 'px' }"
       @mousedown="startDrag"
       @mousemove="doDrag"
       v-bind:value="value"
-    ></v-btn>
+    >
+      <slot></slot>
+    </v-btn>
   </div>
 </template>
 <script>
@@ -18,7 +21,7 @@ export default {
       position: 0,
       clickpos: 0,
       dragging: false,
-      curseur_width: 30
+      curseur_width: 100
     }
   },
   created() {},
@@ -53,12 +56,12 @@ export default {
 
     setNewCurrentPosition(e) {
       var newPos = e.clientX - this.clickpos
-      if (newPos > this.width) newPos = this.width
+      if (newPos > this.width - this.curseur_width) newPos = this.width - this.curseur_width
       if (newPos < 0) newPos = 0
       if (this.position !== newPos) {
         this.position = newPos
-        this.$emit('change', Math.floor((this.position / this.width) * this.max))
-        this.$emit('input', Math.floor((this.position / this.width) * this.max))
+        this.$emit('change', Math.floor((this.position / (this.width - this.curseur_width)) * this.max))
+        this.$emit('input', Math.floor((this.position / (this.width - this.curseur_width)) * this.max))
       }
     },
     onSliderMouseUp(e) {
