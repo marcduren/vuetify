@@ -3,6 +3,7 @@
     <v-btn
       class="grey darken-2"
       dark
+      text
       style="height:30px;position:absolute;cursor:pointer;"
       :style="{ width: curseur_width + 'px', left: position + 'px' }"
       @mousedown="startDrag"
@@ -56,12 +57,17 @@ export default {
 
     setNewCurrentPosition(e) {
       var newPos = e.clientX - this.clickpos
-      if (newPos > this.width - this.curseur_width) newPos = this.width - this.curseur_width
+      let rightEdge = this.width - this.curseur_width
+      if (newPos > rightEdge) newPos = rightEdge
       if (newPos < 0) newPos = 0
       if (this.position !== newPos) {
+        let oldEmitPos = Math.floor((this.position / rightEdge) * this.max)
         this.position = newPos
-        this.$emit('change', Math.floor((this.position / (this.width - this.curseur_width)) * this.max))
-        this.$emit('input', Math.floor((this.position / (this.width - this.curseur_width)) * this.max))
+        let newEmitPos = Math.floor((this.position / rightEdge) * this.max)
+        if (oldEmitPos !== newEmitPos) {
+          this.$emit('change', newEmitPos)
+          this.$emit('input', newEmitPos)
+        }
       }
     },
     onSliderMouseUp(e) {
