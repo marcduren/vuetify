@@ -69,7 +69,6 @@ export default {
       const [day, month, year] = dte.split('/')
       var s = `${year}-${month}-${day}`
       var d = Date.parse(s)
-      console.log(d)
       if (!isNaN(d)) {
         this.sdate = s
         this.datefr = dte
