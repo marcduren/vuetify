@@ -38,10 +38,11 @@
  * </template>
  *
  * mounted() {
- *   this.$root.$confirm = this.$refs.confirm.open
+ *   this.$root.$confirm = this.$refs.confirm.openDialogConfirm
  * }
  */
 export default {
+  name: 'Confirm',
   data: () => ({
     dialog: false,
     resolve: null,
@@ -55,7 +56,7 @@ export default {
     }
   }),
   methods: {
-    open(title, message, options) {
+    openDialogConfirm(title, message, options) {
       this.dialog = true
       this.title = title
       this.message = message
