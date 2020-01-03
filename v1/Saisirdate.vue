@@ -14,7 +14,9 @@
         :min-width="width"
       >
         <template v-slot:activator="{ on }">
-          <v-btn icon v-on="on"><v-icon>{{icon}}</v-icon></v-btn>
+          <v-btn icon v-on="on"
+            ><v-icon>{{ icon }}</v-icon></v-btn
+          >
         </template>
         <v-date-picker v-model="sdate" no-title locale="fr" first-day-of-week="1" @input="onPicker"> </v-date-picker>
       </v-menu>
@@ -28,7 +30,7 @@ export default {
       menu: null,
       sdate: null,
       datefr: null,
-      erreur:false
+      erreur: false
     }
   },
   created() {
