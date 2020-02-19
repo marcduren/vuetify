@@ -73,7 +73,7 @@ export default {
     onSliderMouseUp(e) {
       e.stopPropagation()
       this.dragging = false
-      this.app.removeEventListener('mousemove', this.onMouseMove, true)
+      this.app.removeEventListener('mousemove', this.doDrag, true)
       this.app.removeEventListener('mouseup', this.onSliderMouseUp, true)
     }
   },
