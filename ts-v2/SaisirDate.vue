@@ -32,7 +32,7 @@ export default Vue.extend({
     menu: false,
     sdate: '',
     datefr: '',
-    erreur: false
+    erreur: false,
   }),
   created() {
     this.sdate = this.value
@@ -43,28 +43,31 @@ export default Vue.extend({
     value() {
       this.sdate = this.value
       this.toFrench()
-    }
+    },
   },
   props: {
     value: {
       type: String,
-      default: null
+      default: null,
     },
     label: {
       type: String,
-      default: ''
+      default: '',
     },
     width: {
       type: Number,
-      default: 290
+      default: 290,
     },
     icon: {
       type: String,
-      default: 'mdi-calendar-edit'
-    }
+      default: 'mdi-calendar-edit',
+    },
   },
   methods: {
     toFrench() {
+      if (this.sdate == null) {
+        return ''
+      }
       const [year, month, day] = this.sdate.split('-')
       this.datefr = `${day}/${month}/${year}`
     },
@@ -85,7 +88,7 @@ export default Vue.extend({
       this.menu = false
       this.toFrench()
       this.$emit('input', this.sdate)
-    }
-  }
+    },
+  },
 })
 </script>
