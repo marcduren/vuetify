@@ -5,8 +5,13 @@
       <v-card-text v-show="!!message">{{ message }}</v-card-text>
       <v-card-actions class="pt-0">
         <v-spacer />
-        <v-btn depressed @click.native="cancel">Non</v-btn>
-        <v-btn :color="options.color" dark depressed @click.native="agree">Oui</v-btn>
+        <template v-if="options.mode == 'confirm'">
+          <v-btn depressed @click.native="cancel">Non</v-btn>
+          <v-btn :color="options.color" dark depressed @click.native="agree">Oui</v-btn>
+        </template>
+        <template v-else>
+          <v-btn depressed @click.native="cancel">Fermer</v-btn>
+        </template>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -72,7 +77,8 @@ export default Vue.extend({
     options: {
       color: 'primary',
       width: 290,
-      zIndex: 200
+      zIndex: 200,
+      mode: 'confirm' // 'info'
     }
   }),
   methods: {
