@@ -14,23 +14,46 @@
   </v-dialog>
 </template>
 <script lang="ts">
-/**
- * Vuetify inputdialog component
- *
- * Insert component where you want to use it:
- *  <inputdialog ref="inputdialog"></inputdialog>
- *
- * import component:
- *  import inputdialog from '@/components/Inputdialog.vue'
- * ...
- * declare it:
- *  components: { inputdialog },
- *
- * Call it:
- *  this.$refs.inputdialog.open('title','label', 'initialValue').then((value) => {})
- * Or use await:
- *  let returnval = await this.$refs.inputdialog.open('title','label', 'initialValue')
- *
+/********************************
+ Vuetify inputdialog component
+*******************************
+
+ Insert component where you want to use it:
+  <inputdialog ref="inputdialog"></inputdialog>
+
+ import component:
+  import inputdialog from '@/components/Inputdialog.vue'
+ ...
+ declare it:
+  components: { inputdialog },
+
+ Call it:
+  this.$refs.inputdialog.open('title','label', 'initialValue').then((value) => {})
+ Or use await:
+  let returnval = await this.$refs.inputdialog.open('title','label', 'initialValue')
+
+ -----TypeScript EXAMPLE in App.vue -----
+  <script lang="ts">
+  import Vue from 'vue'
+  import inputdialog from '@/components/Inputdialog.vue'
+  interface Inputdialog extends Vue {
+    openinputdialog(title: string, message: string, initialValue: string): Promise<string> | Promise<boolean>
+  }
+  declare module 'vue/types/vue' {
+    interface Vue {
+      $inputdialog: (title: string, message: string, initialValue: string) => Promise<string> | Promise<boolean>
+    }
+  }
+  export default Vue.extend({
+    name: 'App',
+    components: { inputdialog },
+    mounted() {
+      this.$root.$inputdialog = (title: string, message: string, initialValue: string) => (this.$refs.inputdialog as Inputdialog).openinputdialog(title, message, initialValue)
+    }
+  }
+
+  in your .vue file:
+    let returnval = await this.$root.$inputdialog('Save', 'filename', this.filename)
  */
 import Vue from 'vue'
 
@@ -50,7 +73,7 @@ export default Vue.extend({
     }
   }),
   methods: {
-    open(title: string, label: string, initialValue: string): Promise<string> {
+    open(title: string, label: string, initialValue: string): Promise<string> | Promise<boolean> {
       this.dialog = true
       this.title = title
       this.label = label
