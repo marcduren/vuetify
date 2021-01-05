@@ -28,9 +28,9 @@
   components: { inputdialog },
 
  Call it:
-  this.$refs.inputdialog.open('title','label', 'initialValue').then((value) => {})
+  this.$refs.inputdialog.openinputdialog('title','label', 'initialValue').then((value) => {})
  Or use await:
-  let returnval = await this.$refs.inputdialog.open('title','label', 'initialValue')
+  let returnval = await this.$refs.inputdialog.openinputdialog('title','label', 'initialValue')
 
  -----TypeScript EXAMPLE in App.vue -----
   <script lang="ts">
@@ -73,7 +73,7 @@ export default Vue.extend({
     }
   }),
   methods: {
-    open(title: string, label: string, initialValue: string): Promise<string> | Promise<boolean> {
+    openinputdialog(title: string, label: string, initialValue: string): Promise<string> | Promise<boolean> {
       this.dialog = true
       this.title = title
       this.label = label
