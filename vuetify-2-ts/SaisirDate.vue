@@ -4,15 +4,7 @@
   -->
   <v-text-field :label="label" v-bind:value="datefr" v-on:input="onDate($event)" :error="erreur">
     <template v-slot:append>
-      <v-menu
-        v-model="menu"
-        :close-on-content-click="false"
-        :nudge-right="40"
-        transition="scale-transition"
-        offset-y
-        :max-width="width"
-        :min-width="width"
-      >
+      <v-menu v-model="menu" :close-on-content-click="false" :nudge-right="40" transition="scale-transition" offset-y :max-width="width" :min-width="width">
         <template v-slot:activator="{ on }">
           <v-btn icon v-on="on"
             ><v-icon>{{ icon }}</v-icon></v-btn
@@ -32,7 +24,7 @@ export default Vue.extend({
     menu: false,
     sdate: '',
     datefr: '',
-    erreur: false,
+    erreur: false
   }),
   created() {
     this.sdate = this.value
@@ -43,25 +35,25 @@ export default Vue.extend({
     value() {
       this.sdate = this.value
       this.toFrench()
-    },
+    }
   },
   props: {
     value: {
       type: String,
-      default: null,
+      default: null
     },
     label: {
       type: String,
-      default: '',
+      default: ''
     },
     width: {
       type: Number,
-      default: 290,
+      default: 290
     },
     icon: {
       type: String,
-      default: 'mdi-calendar-edit',
-    },
+      default: 'mdi-calendar-edit'
+    }
   },
   methods: {
     toFrench() {
@@ -73,8 +65,8 @@ export default Vue.extend({
     },
     onDate(dte: string) {
       const [day, month, year] = dte.split('/')
-      var s = `${year}-${month}-${day}`
-      var d = Date.parse(s)
+      const s = `${year}-${month}-${day}`
+      const d = Date.parse(s)
       if (!isNaN(d)) {
         this.sdate = s
         this.datefr = dte
@@ -88,7 +80,7 @@ export default Vue.extend({
       this.menu = false
       this.toFrench()
       this.$emit('input', this.sdate)
-    },
-  },
+    }
+  }
 })
 </script>
