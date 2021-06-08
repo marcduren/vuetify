@@ -70,8 +70,8 @@ export default Vue.extend({
   name: 'Confirm',
   data: () => ({
     dialog: false,
-    resolve: null as any,
-    reject: null as any,
+    resolve: (value: boolean | PromiseLike<boolean>) => {},
+    reject: (reason?: any): void => {},
     message: null as null | string,
     title: null as null | string,
     options: {
