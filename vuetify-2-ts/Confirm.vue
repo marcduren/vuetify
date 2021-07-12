@@ -5,7 +5,7 @@
       <v-card-text v-show="!!message">{{ message }}</v-card-text>
       <v-card-actions class="pt-0">
         <v-spacer />
-        <template v-if="options.mode == 'confirm'">
+        <template v-if="options.mode != 'info'">
           <v-btn depressed @click.native="cancel">Non</v-btn>
           <v-btn :color="options.color" dark depressed @click.native="agree">Oui</v-btn>
         </template>
@@ -26,9 +26,9 @@ import Vue from 'vue'
  * <confirm ref="confirm"></confirm>
  *
  * Call it:
- * this.$refs.confirm.open('Delete', 'Are you sure?', { color: 'red' }).then((confirm) => {})
+ * this.$refs.confirm.openDialogConfirm('Delete', 'Are you sure?', { color: 'red' }).then((confirm) => {})
  * Or use await:
- * if (await this.$refs.confirm.open('Delete', 'Are you sure?', { color: 'red' })) {
+ * if (await this.$refs.confirm.openDialogConfirm('Delete', 'Are you sure?', { color: 'red' })) {
  *   // yes
  * }
  * else {
@@ -64,6 +64,9 @@ import Vue from 'vue'
  *
  * type PromiseResolve<T> = (value?: T | PromiseLike<T>) => boolean
  * type PromiseReject = (error?: any) => void
+ *
+ * in your .vue file:
+    let returnval = await this.$root.$Confirmer('Delete', 'filename will be deleted')
  */
 
 export default Vue.extend({
