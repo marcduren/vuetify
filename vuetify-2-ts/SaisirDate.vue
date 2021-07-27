@@ -1,6 +1,6 @@
 <template>
   <!--
-  <Saisirdate label="Du" v-model="jour"></Saisirdate>
+  <saisir-date label="Du" v-model="jour"></saisir-date>
   -->
   <v-text-field :label="label" v-bind:value="datefr" v-on:input="onDate($event)" :error="erreur">
     <template v-slot:append>
