@@ -2,7 +2,7 @@
   <!--
   <saisir-date label="Du" v-model="jour"></saisir-date>
   -->
-  <v-text-field :label="label" v-bind:value="datefr" v-on:input="onDate($event)" :error="erreur">
+  <v-text-field clearable :label="label" v-bind:value="datefr" v-on:input="onDate($event)" :error="erreur">
     <template v-slot:append>
       <v-menu v-model="menu" :close-on-content-click="false" :nudge-right="40" transition="scale-transition" offset-y :max-width="width" :min-width="width">
         <template v-slot:activator="{ on }">
@@ -28,8 +28,14 @@ export default Vue.extend({
   }),
   created() {
     this.sdate = this.value
-    const [year, month, day] = this.value.split('-')
-    this.datefr = `${day}/${month}/${year}`
+    if (this.value) {
+      const [year, month, day] = this.value.split('-')
+      if (year && month && day) {
+        this.datefr = `${day}/${month}/${year}`
+      }
+    } else {
+      this.datefr = ''
+    }
   },
   watch: {
     value() {
@@ -61,19 +67,23 @@ export default Vue.extend({
         return ''
       }
       const [year, month, day] = this.sdate.split('-')
-      this.datefr = `${day}/${month}/${year}`
+      if (year && month && day) {
+        this.datefr = `${day}/${month}/${year}`
+      }
     },
     onDate(dte: string) {
       const [day, month, year] = dte.split('/')
-      const s = `${year}-${month}-${day}`
-      const d = Date.parse(s)
-      if (!isNaN(d)) {
-        this.sdate = s
-        this.datefr = dte
-        this.$emit('input', this.sdate)
-        this.erreur = false
-      } else {
-        this.erreur = true
+      if (year && month && day) {
+        const s = `${year}-${month}-${day}`
+        const d = Date.parse(s)
+        if (!isNaN(d)) {
+          this.sdate = s
+          this.datefr = dte
+          this.$emit('input', this.sdate)
+          this.erreur = false
+        } else {
+          this.erreur = true
+        }
       }
     },
     onPicker() {
