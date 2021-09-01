@@ -72,6 +72,7 @@ export default Vue.extend({
       }
     },
     onDate(dte: string) {
+      if (!dte) return
       const [day, month, year] = dte.split('/')
       if (year && month && day) {
         const s = `${year}-${month}-${day}`
