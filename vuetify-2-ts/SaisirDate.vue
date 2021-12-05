@@ -1,16 +1,16 @@
 <template>
   <!--
-  <saisir-date label="Du" v-model="jour"></saisir-date>
+  <Saisirdate label="Du" v-model="jour"></Saisirdate>
   -->
-  <v-text-field clearable :label="label" v-bind:value="datefr" v-on:input="onDate($event)" :error="erreur">
+  <v-text-field :label="label" v-bind:value="datefr" v-on:input="onDate($event)" :error="erreur" :solo="solo" :flat="flat" :clearable="clearable">
     <template v-slot:append>
-      <v-menu v-model="menu" :close-on-content-click="false" :nudge-right="40" transition="scale-transition" offset-y :max-width="width" :min-width="width">
+      <v-menu v-model="menu" :close-on-content-click="false" :nudge-right="40" transition="none" offset-y :max-width="width" :min-width="width">
         <template v-slot:activator="{ on }">
           <v-btn icon v-on="on"
             ><v-icon>{{ icon }}</v-icon></v-btn
           >
         </template>
-        <v-date-picker v-model="sdate" no-title locale="fr" first-day-of-week="1" @input="onPicker"> </v-date-picker>
+        <v-date-picker v-model="sdate" show-adjacent-months locale="fr" first-day-of-week="1" @input="onPicker"> </v-date-picker>
       </v-menu>
     </template>
   </v-text-field>
@@ -59,7 +59,10 @@ export default Vue.extend({
     icon: {
       type: String,
       default: 'mdi-calendar-edit'
-    }
+    },
+    solo: Boolean,
+    flat: Boolean,
+    clearable: Boolean
   },
   methods: {
     toFrench() {
