@@ -2,7 +2,18 @@
   <!--
   <Saisirdate label="Du" v-model="jour"></Saisirdate>
   -->
-  <v-text-field :label="label" v-bind:value="datefr" v-on:input="onDate($event)" :error="erreur" :solo="solo" :flat="flat" :clearable="clearable">
+  <v-text-field
+    :label="label"
+    v-bind:value="datefr"
+    v-on:input="onDate($event)"
+    :error="erreur"
+    :solo="solo"
+    :flat="flat"
+    :outlined="outlined"
+    :dense="dense"
+    :clearable="clearable"
+    @click:clear="clearDate"
+  >
     <template v-slot:append>
       <v-menu v-model="menu" :close-on-content-click="false" :nudge-right="40" transition="none" offset-y :max-width="width" :min-width="width">
         <template v-slot:activator="{ on }">
@@ -62,7 +73,9 @@ export default Vue.extend({
     },
     solo: Boolean,
     flat: Boolean,
-    clearable: Boolean
+    outlined: Boolean,
+    clearable: Boolean,
+    dense: Boolean
   },
   methods: {
     toFrench() {
@@ -75,7 +88,10 @@ export default Vue.extend({
       }
     },
     onDate(dte: string) {
-      if (!dte) return
+      if (!dte) {
+        this.sdate = ''
+        return
+      }
       const [day, month, year] = dte.split('/')
       if (year && month && day) {
         const s = `${year}-${month}-${day}`
@@ -93,6 +109,10 @@ export default Vue.extend({
     onPicker() {
       this.menu = false
       this.toFrench()
+      this.$emit('input', this.sdate)
+    },
+    clearDate() {
+      this.sdate = ''
       this.$emit('input', this.sdate)
     }
   }
