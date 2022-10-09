@@ -35,6 +35,8 @@ export default Vue.extend({
         colA = parseFloat(a[colonne])
         colB = parseFloat(b[colonne])
       }
+      colA = String(colA).toUpperCase()
+      colB = String(colB).toUpperCase()
       if (colA > colB) {
         return croissant ? 1 : -1
       }
