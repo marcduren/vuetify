@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="dialog" :max-width="options.width" :style="{ zIndex: options.zIndex }" @keydown.esc="cancel">
+  <v-dialog v-model="dialog" :max-width="options.width" :style="{ zIndex: options.zIndex }" @keydown.esc="cancel" persistent>
     <v-card>
       <v-card-title class="headline mb-0">{{ title }}</v-card-title>
       <v-card-text v-show="!!message">{{ message }}</v-card-text>
