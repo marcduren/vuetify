@@ -1,8 +1,20 @@
 interface Colonne {
+  text: string
   value: string
-  type: string
+  type?: string
+  width?: string | number
+  sortable?: boolean
+  selectAll?: boolean
 }
 import Vue from 'vue'
+declare module 'vue/types/vue' {
+  interface Vue {
+    colonnes: Colonne[]
+    triCroissant: boolean
+    triColonne: null | number
+    trierColonne(ncol: number, lignes: any[]): void
+  }
+}
 
 export default Vue.extend({
   data() {
@@ -24,19 +36,24 @@ export default Vue.extend({
       if (type == 'date') {
         if (a[colonne] > '') {
           const [j1, m1, a1] = a[colonne].split('/')
-          colA = a1 + '.' + m1 + '.' + j1
+          colA = a1 + '-' + m1 + '-' + j1
+        } else {
+          colA = '9999-99-99'
         }
         if (b[colonne] > '') {
           const [j2, m2, a2] = b[colonne].split('/')
-          colB = a2 + '.' + m2 + '.' + j2
+          colB = a2 + '-' + m2 + '-' + j2
+        } else {
+          colB = '9999-99-99'
         }
       }
       if (type == 'number') {
         colA = parseFloat(a[colonne])
         colB = parseFloat(b[colonne])
+      } else {
+        colA = String(colA).toUpperCase()
+        colB = String(colB).toUpperCase()
       }
-      colA = String(colA).toUpperCase()
-      colB = String(colB).toUpperCase()
       if (colA > colB) {
         return croissant ? 1 : -1
       }
@@ -45,7 +62,7 @@ export default Vue.extend({
       }
       return this.comparerColonnes(ncol + 1, croissant, a, b)
     },
-    trierColonne(ncol: number, lignes: []): void {
+    trierColonne(ncol: number, lignes: any[]): void {
       if (this.triColonne == ncol) {
         this.triCroissant = !this.triCroissant
       } else {
