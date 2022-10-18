@@ -1,16 +1,17 @@
 <template>
   <v-dialog v-model="dialog" :max-width="options.width" :style="{ zIndex: options.zIndex }" @keydown.esc="cancel">
-    <v-card>
-      <v-card-title>{{ title }}</v-card-title>
-      <div class="px-3 py-1">
-        <v-text-field v-model="localeValue" :label="label" placeholder=" "></v-text-field>
+    <div class="grey lighten-3 pa-2">
+      <div class="text-h6 my-2">{{ title }}</div>
+      <div>
+        <div class="text-body-2">{{ label }}</div>
+        <v-text-field v-model="localeValue" hide-details solo flat></v-text-field>
       </div>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn text @click.native="cancel">Annuler</v-btn>
-        <v-btn color="primary" depressed @click.native="agree">Valider</v-btn>
+        <v-btn text rounded @click.native="cancel">Annuler</v-btn>
+        <v-btn color="primary" depressed rounded @click.native="agree">Valider</v-btn>
       </v-card-actions>
-    </v-card>
+    </div>
   </v-dialog>
 </template>
 <script lang="ts">
@@ -58,6 +59,7 @@
 import Vue from 'vue'
 
 export default Vue.extend({
+  name: 'inputDialog',
   data: () => ({
     dialog: false,
     resolve: null as any,
