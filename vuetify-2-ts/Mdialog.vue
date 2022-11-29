@@ -12,7 +12,7 @@
           <v-btn icon @click="onFermer"><v-icon>mdi-close</v-icon></v-btn>
         </v-toolbar>
         <div class="modal-body grow" :class="[couleur]" style="overflow: auto">
-          <div class="pa-4"><slot></slot></div>
+          <div class="pa-4 fill-height"><slot></slot></div>
         </div>
         <template v-if="boutons.length > 0">
           <div class="shrink pa-2 d-flex dlg-actions" :class="couleur">
