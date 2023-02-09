@@ -104,6 +104,10 @@ export default Vue.extend({
     handleMouseMove(e: MouseEvent) {
       this.left = e.screenX - this.xdown
       this.top = e.screenY - this.ydown
+      if (this.top < 0) this.top = 0
+      if (this.top + 100 > window.innerHeight) this.top = window.innerHeight - 100
+      if (this.left < 0) this.left = 0
+      if (this.left + this.width > window.innerWidth) this.left = window.innerWidth - this.width
     },
     handleMouseUp() {
       window.removeEventListener('mousemove', this.handleMouseMove, false)
