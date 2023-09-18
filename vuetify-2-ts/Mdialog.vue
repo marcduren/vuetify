@@ -1,26 +1,22 @@
 <template>
   <div>
-    <div v-if="modelValue" disabled style="position: fixed; left: 0; right: 0; top: 0; bottom: 0; background-color: #000; opacity: 0.2; z-index: 100" @click="onClickOut"></div>
-    <div v-if="modelValue" class="elevation-6" style="position: fixed; z-index: 101" :style="{ width: width + 'px', height: pageHeight, left: left + 'px', top: top + 'px' }">
+    <div v-if="modelValue" disabled style="position: fixed; left: 0; right: 0; top: 0; bottom: 0; background-color: #000; opacity: 0.2" :style="{ 'z-index': zindex }" @click="onClickOut"></div>
+    <div v-if="modelValue" class="elevation-6" style="position: fixed" :style="{ 'z-index': zindex + 1, width: width + 'px', height: pageHeight, left: left + 'px', top: top + 'px' }" :id="unique_id">
       <div style="display: flex; flex-direction: column; height: 100%">
         <v-toolbar class="shrink deplacable" :color="couleurTitre" :light="themeTitre == 'light'" :dark="themeTitre == 'dark'" dense flat @mousedown="handleMouseDown">
-          <v-btn small class="mx-1" icon @click="positionGauche"><v-icon class="mdi-18px">mdi-arrow-left</v-icon></v-btn>
-          <v-btn small class="mx-1" icon @click="positionDroite"><v-icon class="mdi-18px">mdi-arrow-right</v-icon></v-btn>
-          <!-- <v-btn small class="mx-1" icon @click="changeHauteur"><v-icon class="mdi-18px">mdi-arrow-up-down</v-icon></v-btn> -->
           <v-toolbar-title class="text-center" style="width: 100%">{{ titre }}</v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn icon @click="onFermer"><v-icon>mdi-close</v-icon></v-btn>
         </v-toolbar>
         <div class="modal-body grow" :class="[couleur]" style="overflow: auto">
-          <div class="pa-4 fill-height"><slot></slot></div>
+          <div class="fill-height" :class="defaultpadding"><slot></slot></div>
         </div>
-        <template v-if="boutons.length > 0">
+        <template v-if="boutons.valider || boutons.annuler || boutons.supprimer">
           <div class="shrink pa-2 d-flex dlg-actions" :class="couleur">
-            <v-btn class="mx-1" rounded text color="error" v-if="boutons.includes('supprimer')" @click="onSupprimer">Supprimer</v-btn>
+            <v-btn class="mx-1" rounded text color="error" v-if="boutons.supprimer" @click="onSupprimer" :disabled="!boutons.supprimer.actif">{{ boutons.supprimer.texte }}</v-btn>
             <v-spacer></v-spacer>
-            <v-btn class="mx-1" rounded depressed color="grey lighten-2" v-if="boutons.includes('fermer')" @click="onFermer">Fermer</v-btn>
-            <v-btn class="mx-1" rounded depressed color="grey lighten-2" v-if="boutons.includes('annuler')" @click="onFermer">Annuler</v-btn>
-            <v-btn class="mx-1" rounded depressed color="primary" v-if="boutons.includes('valider')" @click="onValider">Valider</v-btn>
+            <v-btn class="mx-1" rounded depressed color="grey lighten-2" v-if="boutons.annuler" @click="onFermer" :disabled="!boutons.annuler.actif">{{ boutons.annuler.texte }}</v-btn>
+            <v-btn class="mx-1" rounded depressed color="primary" @click="onValider" :disabled="!boutons.valider.actif">{{ boutons.valider.texte }}</v-btn>
           </div>
         </template>
       </div>
@@ -29,8 +25,9 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
+let pileFenetres = [] as string[]
 
-export default Vue.extend({
+var mdialog = Vue.extend({
   name: 'm-dialog',
   props: {
     value: Boolean,
@@ -39,14 +36,12 @@ export default Vue.extend({
       required: true
     },
     boutons: {
-      type: Array,
+      type: Object,
       required: false,
-      default: function () {
-        return ['valider', 'annuler'] /** valider,annuler,fermer,supprimer */
-      }
+      default: () => ({ valider: { texte: 'Valider', actif: true }, annuler: { texte: 'Annuler', actif: true } }) /** valider,annuler,supprimer */
     },
     width: {
-      type: [String, Number],
+      type: Number,
       default: 900
     },
     couleur: {
@@ -60,7 +55,8 @@ export default Vue.extend({
     themeTitre: {
       type: String,
       default: 'dark'
-    }
+    },
+    defaultpadding: { type: String, default: 'pa-3' }
   },
   data() {
     return {
@@ -70,12 +66,23 @@ export default Vue.extend({
       ydown: 0,
       modelValue: this.value,
       maxHeight: 1000,
-      pageHeight: 'inherit'
+      pageHeight: 'inherit',
+      unique_id: '1',
+      zindex: 100
     }
   },
   watch: {
     value() {
       this.modelValue = this.value
+      if (this.value) {
+        window.addEventListener('keydown', this.onKeydown)
+        pileFenetres.push(this.unique_id)
+        this.zindex = 100 + pileFenetres.length * 2
+        window.focus()
+      } else {
+        window.removeEventListener('keydown', this.onKeydown)
+        pileFenetres.pop()
+      }
     }
   },
   methods: {
@@ -117,26 +124,25 @@ export default Vue.extend({
       const vnode = document.body
       const rect = vnode.getBoundingClientRect()
       this.left = (rect.width - Number(this.width)) / 2
-      this.top = 10
-    },
-    positionDroite() {
-      const vnode = document.body
-      const rect = vnode.getBoundingClientRect()
-      this.left = rect.width - Number(this.width)
-    },
-    positionGauche() {
-      this.left = 0
-    },
-    changeHauteur() {
-      if (this.pageHeight == 'inherit') {
-        this.top = 0
-        const vnode = document.body
-        const rect = vnode.getBoundingClientRect()
-        this.pageHeight = rect.height - 20 + 'px'
+      const fen = document.getElementById(this.unique_id)
+      if (fen) {
+        const rectDlg = fen?.getBoundingClientRect()
+        this.top = (rect.height - Number(rectDlg?.height)) / 2
       } else {
-        this.pageHeight = 'inherit'
+      this.top = 10
+      }
+    },
+    onKeydown(e: KeyboardEvent) {
+      const i = pileFenetres.length
+      if (e.code == 'Escape' && i > 0 && pileFenetres[i - 1] == this.unique_id) {
+        // touche Escape et dialogue topmost
+        this.$emit('fermer')
+        e.stopPropagation()
       }
     }
+  },
+  beforeMount() {
+    this.unique_id = `${new Date().getTime()}-${Math.random().toString(36).substring(7)}`
   },
   mounted() {
     if (this.$attrs['height']) {
@@ -148,6 +154,7 @@ export default Vue.extend({
     this.centrer()
   }
 })
+export default mdialog
 </script>
 <style scoped>
 .deplacable {
