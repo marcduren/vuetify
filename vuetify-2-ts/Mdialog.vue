@@ -1,18 +1,34 @@
 <template>
   <div>
-    <div v-if="modelValue" disabled style="position: fixed; left: 0; right: 0; top: 0; bottom: 0; background-color: #000; opacity: 0.2; z-index: 100" @click="onClickOut"></div>
-    <div v-if="modelValue" class="elevation-6" style="position: fixed; z-index: 101" :style="{ width: width + 'px', height: pageHeight, left: left + 'px', top: top + 'px' }">
+    <div
+      v-if="modelValue"
+      disabled
+      style="position: fixed; left: 0; right: 0; top: 0; bottom: 0; background-color: #000; opacity: 0.2; z-index: 100"
+      @click="onClickOut"
+    ></div>
+    <div
+      v-if="modelValue"
+      class="elevation-6"
+      style="position: fixed; z-index: 101"
+      :style="{ width: width + 'px', height: pageHeight, left: left + 'px', top: top + 'px' }"
+      :id="unique_id"
+    >
       <div style="display: flex; flex-direction: column; height: 100%">
-        <v-toolbar class="shrink deplacable" :color="couleurTitre" :light="themeTitre == 'light'" :dark="themeTitre == 'dark'" dense flat @mousedown="handleMouseDown">
-          <v-btn small class="mx-1" icon @click="positionGauche"><v-icon class="mdi-18px">mdi-arrow-left</v-icon></v-btn>
-          <v-btn small class="mx-1" icon @click="positionDroite"><v-icon class="mdi-18px">mdi-arrow-right</v-icon></v-btn>
-          <!-- <v-btn small class="mx-1" icon @click="changeHauteur"><v-icon class="mdi-18px">mdi-arrow-up-down</v-icon></v-btn> -->
+        <v-toolbar
+          class="shrink deplacable"
+          :color="couleurTitre"
+          :light="themeTitre == 'light'"
+          :dark="themeTitre == 'dark'"
+          dense
+          flat
+          @mousedown="handleMouseDown"
+        >
           <v-toolbar-title class="text-center" style="width: 100%">{{ titre }}</v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn icon @click="onFermer"><v-icon>mdi-close</v-icon></v-btn>
         </v-toolbar>
         <div class="modal-body grow" :class="[couleur]" style="overflow: auto">
-          <div class="pa-4 fill-height"><slot></slot></div>
+          <div class="fill-height" :class="defaultpadding"><slot></slot></div>
         </div>
         <template v-if="boutons.length > 0">
           <div class="shrink pa-2 d-flex dlg-actions" :class="couleur">
@@ -20,7 +36,9 @@
             <v-spacer></v-spacer>
             <v-btn class="mx-1" rounded depressed color="grey lighten-2" v-if="boutons.includes('fermer')" @click="onFermer">Fermer</v-btn>
             <v-btn class="mx-1" rounded depressed color="grey lighten-2" v-if="boutons.includes('annuler')" @click="onFermer">Annuler</v-btn>
-            <v-btn class="mx-1" rounded depressed color="primary" v-if="boutons.includes('valider')" @click="onValider">Valider</v-btn>
+            <v-btn class="mx-1" rounded depressed color="primary" v-if="boutons.includes('valider')" @click="onValider" :disabled="!validerActif"
+              >Valider</v-btn
+            >
           </div>
         </template>
       </div>
@@ -29,7 +47,6 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
-
 export default Vue.extend({
   name: 'm-dialog',
   props: {
@@ -46,7 +63,7 @@ export default Vue.extend({
       }
     },
     width: {
-      type: [String, Number],
+      type: Number,
       default: 900
     },
     couleur: {
@@ -60,7 +77,12 @@ export default Vue.extend({
     themeTitre: {
       type: String,
       default: 'dark'
-    }
+    },
+    validerActif: {
+      type: Boolean,
+      default: true
+    },
+    defaultpadding: { type: String, default: 'pa-3' }
   },
   data() {
     return {
@@ -70,7 +92,8 @@ export default Vue.extend({
       ydown: 0,
       modelValue: this.value,
       maxHeight: 1000,
-      pageHeight: 'inherit'
+      pageHeight: 'inherit',
+      unique_id: '1'
     }
   },
   watch: {
@@ -117,15 +140,13 @@ export default Vue.extend({
       const vnode = document.body
       const rect = vnode.getBoundingClientRect()
       this.left = (rect.width - Number(this.width)) / 2
-      this.top = 10
-    },
-    positionDroite() {
-      const vnode = document.body
-      const rect = vnode.getBoundingClientRect()
-      this.left = rect.width - Number(this.width)
-    },
-    positionGauche() {
-      this.left = 0
+      const fen = document.getElementById(this.unique_id)
+      if (fen) {
+        const rectDlg = fen?.getBoundingClientRect()
+        this.top = (rect.height - Number(rectDlg?.height)) / 2
+      } else {
+        this.top = 10
+      }
     },
     changeHauteur() {
       if (this.pageHeight == 'inherit') {
@@ -137,6 +158,9 @@ export default Vue.extend({
         this.pageHeight = 'inherit'
       }
     }
+  },
+  beforeMount() {
+    this.unique_id = `${new Date().getTime()}-${Math.random().toString(36).substring(7)}`
   },
   mounted() {
     if (this.$attrs['height']) {
