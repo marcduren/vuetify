@@ -47,7 +47,7 @@ var mdialog = Vue.extend({
     boutons: {
       type: Object as PropType<Boutons>,
       required: false,
-      default: () => ({ valider: { texte: 'Valider', actif: true }, annuler: { texte: 'Annuler', actif: true } } as PropValidator<Boutons>)
+      default: () => ({ valider: { texte: '✔Valider', actif: true }, annuler: { texte: '✘Annuler', actif: true } } as PropValidator<Boutons>)
     },
     width: {
       type: Number,
