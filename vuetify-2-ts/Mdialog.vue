@@ -11,12 +11,12 @@
         <div class="modal-body grow" :class="[couleur]" style="overflow: auto">
           <div class="fill-height" :class="defaultpadding"><slot></slot></div>
         </div>
-        <template v-if="boutons.valider || boutons.annuler || boutons.supprimer">
+        <template v-if="m_btns.valider || m_btns.annuler || m_btns.supprimer">
           <div class="shrink pa-2 d-flex dlg-actions" :class="couleur">
-            <v-btn class="mx-1" rounded text color="error" v-if="boutons.supprimer" @click="onSupprimer" :disabled="!boutons.supprimer.actif">{{ boutons.supprimer.texte }}</v-btn>
+            <v-btn rounded depressed class="mx-1 grey lighten-3 red--text" v-if="m_btns.supprimer" @click="onSupprimer" :disabled="!m_btns.supprimer.actif"><v-icon>mdi-delete-outline</v-icon>{{ m_btns.supprimer.texte }}</v-btn>
             <v-spacer></v-spacer>
-            <v-btn class="mx-1" rounded depressed color="grey lighten-2" v-if="boutons.annuler" @click="onFermer" :disabled="!boutons.annuler.actif">{{ boutons.annuler.texte }}</v-btn>
-            <v-btn class="mx-1" rounded depressed color="primary" v-if="boutons.valider" @click="onValider" :disabled="!boutons.valider.actif">{{ boutons.valider.texte }}</v-btn>
+            <v-btn class="mx-1" rounded depressed color="grey lighten-2" v-if="m_btns.annuler" @click="onFermer" :disabled="!m_btns.annuler.actif">{{ m_btns.annuler.texte }}</v-btn>
+            <v-btn class="mx-1" rounded depressed color="primary" v-if="m_btns.valider" @click="onValider" :disabled="!m_btns.valider.actif">{{ m_btns.valider.texte }}</v-btn>
           </div>
         </template>
       </div>
@@ -24,7 +24,7 @@
   </div>
 </template>
 <script lang="ts">
-import Vue, { PropType, PropValidator } from 'vue'
+import Vue, { PropType } from 'vue'
 let pileFenetres = [] as string[]
 type Bouton = {
   texte: string
@@ -36,7 +36,7 @@ type Boutons = {
   supprimer?: Bouton
 }
 
-var mdialog = Vue.extend({
+var MDialog = Vue.extend({
   name: 'm-dialog',
   props: {
     value: Boolean,
@@ -45,9 +45,10 @@ var mdialog = Vue.extend({
       required: true
     },
     boutons: {
-      type: Object as PropType<Boutons>,
-      required: false,
-      default: () => ({ valider: { texte: '✔Valider', actif: true }, annuler: { texte: '✘Annuler', actif: true } } as PropValidator<Boutons>)
+      type: [Object, Array] as PropType<Boutons | string[]>, // ex { valider: { texte: '✔Valider', actif: true }} ou ['valider','annuler']
+      default: () => {
+        return ['annuler', 'valider']
+      }
     },
     width: {
       type: Number,
@@ -62,7 +63,7 @@ var mdialog = Vue.extend({
       default: 'primary'
     },
     themeTitre: {
-      type: String,
+      type: String as PropType<'dark' | 'light'>,
       default: 'dark'
     },
     defaultpadding: { type: String, default: 'pa-3' }
@@ -77,7 +78,8 @@ var mdialog = Vue.extend({
       maxHeight: 1000,
       pageHeight: 'inherit',
       unique_id: '1',
-      zindex: 100
+      zindex: 100,
+      m_btns: { valider: { texte: '✔Valider', actif: true }, annuler: { texte: '✘Annuler', actif: true } } as Boutons
     }
   },
   watch: {
@@ -91,6 +93,16 @@ var mdialog = Vue.extend({
       } else {
         window.removeEventListener('keydown', this.onKeydown)
         pileFenetres.pop()
+      }
+    },
+    boutons() {
+      if (Array.isArray(this.boutons)) {
+        this.m_btns = {}
+        if (this.boutons.includes('valider')) this.m_btns['valider'] = { texte: '✔Valider', actif: true }
+        if (this.boutons.includes('annuler')) this.m_btns['annuler'] = { texte: '✘Annuler', actif: true }
+        if (this.boutons.includes('supprimer')) this.m_btns['supprimer'] = { texte: 'Supprimer', actif: true }
+      } else if (this.boutons) {
+        this.m_btns = this.boutons
       }
     }
   },
@@ -163,7 +175,7 @@ var mdialog = Vue.extend({
     this.centrer()
   }
 })
-export default mdialog
+export default MDialog
 </script>
 <style scoped>
 .deplacable {
