@@ -1,50 +1,36 @@
 <!--
+  ** usage **
 
-<TableEntete :headers="colonnes" sticky v-on:trier="trierColonne" v-on:selectionnerTout="selectionner"></TableEntete>
- <script lang=ts>
-    comparerColonnes(ncol: number, croissant: boolean, a: any, b: any): number {
-      // fonction récursive
-      const colonnes = ['coulee_date', 'coulee_nucom', 'coulee_qte_totale', 'coulee_qte_rebut', 'coulee_num', 'desi_simple', 'nuance', 'norme', 'raison']
-      const colonnesType = ['date', 'string', 'number', 'number', 'string', 'string', 'string', 'string', 'string']
-      const colonne = colonnes[ncol]
-      const type = colonnesType[ncol]
-      if (ncol >= colonnes.length) return 1
+<template>
+  <TableEntete :headers="colonnes" sticky v-on:trier="onTrierColonne" v-on:selectionnerTout="selectionner"></TableEntete>
+</template>
+<script lang="ts">
+  import TableEntete, { Colonne } from '../components/TableEntete.vue'
 
-      let colA = a[colonne]
-      let colB = b[colonne]
-      if (type == 'date') {
-        const [j1, m1, a1] = a[colonne].split('/')
-        colA = a1 + '.' + m1 + '.' + j1
-        const [j2, m2, a2] = b[colonne].split('/')
-        colB = a2 + '.' + m2 + '.' + j2
-      }
-      if (type == 'number') {
-        colA = parseFloat(a[colonne])
-        colB = parseFloat(b[colonne])
-      }
-      if (colA > colB) {
-        return croissant ? 1 : -1
-      }
-      if (colA < colB) {
-        return croissant ? -1 : 1
-      }
-      return this.comparerColonnes(ncol+1, croissant, a, b)
-    },
-    trierColonne(ncol: number, croissant: boolean): void {
-      this.coulees.sort((a: any, b: any) => {
-        return this.comparerColonnes(ncol, croissant, a, b)
+  data(){
+    lignes: [{coulee_date:'2023-12-02','coulee_num':'123456'},{...}]
+    colonnes = [
+      {text:'Date de coulée',width:200,value:'coulee_date',type:'date',sortable:true},
+      {text:'Numéro coulée',width:100,value:'coulee_num',type:'number',sortable:true},
+      {...}
+    ]
+  }
+  methods: {
+    onTrierColonne(ncol: number,croissant:boolean): void {
+      this.lignes.sort((a: any, b: any) => {
+        return comparerColonnes(this.colonnes, ncol, croissant, a, b)
       })
-      this.formaterTableHtml()
     }
-
- </script>
+  }
+</script>
 -->
+
 <template>
   <thead>
     <tr class="table-entete">
-      <th v-for="(h, l) in headers" :key="l" :width="h.width" class="curseur" :class="{ trier: h.sortable, sticky: sticky }" align="left" @click.stop="trier(l)">
+      <th v-for="(h, l) in headers" :key="l" :width="h.width" class="curseur" :class="{ trier: h.sortable, sticky: sticky }" :style="{ 'text-align': h.type == 'number' ? 'right' : 'left' }" @click.stop="trier(l, h.sortable)">
         <span v-html="h.text" />
-        <v-icon class="icontrier" :class="{ visible: colonneTri == l, 'mdi-flip-v': !croissant }">mdi-menu-down</v-icon>
+        <v-icon v-if="h.sortable" class="icontrier" :class="{ visible: colonneATrier == l, 'mdi-flip-v': !ordreCroissant }">mdi-menu-down</v-icon>
         <v-simple-checkbox style="float: right" v-if="h.selectAll" v-model="selectAll" @input="selectionnerTout"></v-simple-checkbox>
       </th>
     </tr>
@@ -52,45 +38,45 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import Vue, { PropType } from 'vue'
 import { Ripple } from 'vuetify/lib/directives'
 
-interface Colonne {
-  text: string
-  width?: string | number
-  sortable?: boolean
-  selectAll?: boolean
-}
+export type Colonne = { text: string; value: string; type?: string; width: number; sortable?: boolean; selectAll?: boolean }
 
 export default Vue.extend({
   name: 'TableEntete',
   props: {
     headers: {
-      type: Array,
-      default: () => []
+      type: Array as PropType<Colonne[]>,
+      default: () => [] as Colonne[]
     },
     sticky: { type: Boolean, default: false }
   },
   directives: { Ripple },
   data() {
     return {
-      colonneTri: null as null | number,
-      croissant: true,
+      colonneATrier: -1,
+      ordreCroissant: true,
       selectAll: false
     }
   },
   methods: {
-    trier(col: number) {
-      if (this.colonneTri == col) {
-        this.croissant = !this.croissant
-      } else {
-        this.croissant = true
+    trier(col: number, sortable: boolean | undefined) {
+      if (sortable) {
+        if (this.colonneATrier == col) {
+          this.ordreCroissant = !this.ordreCroissant
+        } else {
+          this.ordreCroissant = true
+        }
+        this.colonneATrier = col
+        this.$emit('trier', col, this.ordreCroissant, this.headers)
       }
-      this.colonneTri = col
-      this.$emit('trier', col, this.croissant)
     },
     selectionnerTout() {
       this.$emit('selectionnerTout', this.selectAll)
+    },
+    reset() {
+      this.colonneATrier = -1
     }
   }
 })
@@ -99,21 +85,13 @@ export default Vue.extend({
 .table-entete th {
   padding: 6px 4px;
 }
-.trier {
-  cursor: pointer;
-  padding: 4px 2px;
-  color: #666;
-  font-weight: bold;
-}
-.trier:hover {
-  color: #000;
-}
 .curseur {
   cursor: pointer;
 }
 .icontrier {
   opacity: 0;
 }
+th:hover .icontrier,
 .icontrier.visible {
   opacity: 1;
 }
