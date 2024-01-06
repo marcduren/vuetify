@@ -27,11 +27,11 @@
 
 <template>
   <thead>
-    <tr class="table-entete">
-      <th v-for="(h, l) in headers" :key="l" :width="h.width" class="curseur" :class="{ trier: h.sortable, sticky: sticky }" :style="{ 'text-align': h.type == 'number' ? 'right' : 'left' }" @click.stop="trier(l, h.sortable)">
+    <tr class="table-entete" v-bind="$attrs">
+      <th v-for="(h, l) in headers" :key="l" :width="h.width" class="curseur" :class="colClass(h)" :style="{ 'text-align': h.type == 'number' ? 'right' : 'left' }" @click.stop="trier(l, h.sortable)">
         <span v-html="h.text" />
         <v-icon v-if="h.sortable" class="icontrier" :class="{ visible: colonneATrier == l, 'mdi-flip-v': !ordreCroissant }">mdi-menu-down</v-icon>
-        <v-simple-checkbox style="float: right" v-if="h.selectAll" v-model="selectAll" @input="selectionnerTout"></v-simple-checkbox>
+        <v-simple-checkbox style="float: right" v-if="h.selectAll" v-model="selectionnerToutInterne" @input="selectionnerTout"></v-simple-checkbox>
       </th>
     </tr>
   </thead>
@@ -41,7 +41,7 @@
 import Vue, { PropType } from 'vue'
 import { Ripple } from 'vuetify/lib/directives'
 
-export type Colonne = { text: string; value: string; type?: string; width: number; sortable?: boolean; selectAll?: boolean }
+export type Colonne = { text: string; value: string; type?: string; width: number; sortable?: boolean; selectAll?: boolean; color?: string }
 
 export default Vue.extend({
   name: 'TableEntete',
@@ -57,7 +57,7 @@ export default Vue.extend({
     return {
       colonneATrier: -1,
       ordreCroissant: true,
-      selectAll: false
+      selectionnerToutInterne: false
     }
   },
   methods: {
@@ -73,10 +73,16 @@ export default Vue.extend({
       }
     },
     selectionnerTout() {
-      this.$emit('selectionnerTout', this.selectAll)
+      this.$emit('selectionnerTout', this.selectionnerToutInterne)
     },
     reset() {
       this.colonneATrier = -1
+    },
+    colClass(c: Colonne) {
+      let cl = ''
+      if (c.color) cl += c.color
+      if (this.sticky) cl += ' sticky'
+      return cl
     }
   }
 })
