@@ -27,6 +27,8 @@
 import type { PropType } from 'vue'
 import { ref, onMounted, watch, useAttrs } from 'vue'
 
+const estActive = defineModel({ type: Boolean })
+
 let pileFenetres = [] as string[]
 type Bouton = {
   texte: string
@@ -39,7 +41,6 @@ export type Boutons = {
 }
 
 const props = defineProps({
-  modelValue: Boolean,
   titre: {
     type: String,
     required: true
@@ -68,12 +69,11 @@ const props = defineProps({
   },
   defaultpadding: { type: String, default: 'pa-3' }
 })
-const emit = defineEmits(['change', 'update:modelValue', 'valider', 'supprimer'])
+const emit = defineEmits(['change', 'update:modelValue', 'valider', 'supprimer', 'annuler'])
 const attrs = useAttrs()
 
 // ---------data--------------
 let zindex = ref(1005)
-let estActive = ref(props.modelValue)
 let pageHeight = ref(attrs['height'] ? attrs['height'] + 'px' : 'inherit')
 let left = ref(100)
 let top = ref(100)
@@ -84,7 +84,8 @@ let m_btns = ref<Boutons>({})
 
 //----------methods-----------
 function onFermer() {
-  emit('update:modelValue', false)
+  estActive.value = false
+  emit('annuler')
 }
 function onValider() {
   emit('valider')
@@ -156,10 +157,7 @@ onMounted(() => {
 })
 
 //-------------watch-----------
-watch(
-  () => props.modelValue,
-  (newval) => {
-    estActive.value = newval
+watch(estActive, () => {
     if (estActive.value) {
       window.addEventListener('keydown', onKeydown)
       pileFenetres.push(unique_id)
@@ -169,12 +167,8 @@ watch(
       window.removeEventListener('keydown', onKeydown)
       pileFenetres.pop()
     }
-  }
-)
-watch(
-  () => props.boutons,
-  (boutons) => majBtns(boutons)
-)
+})
+watch(props.boutons, (boutons) => majBtns(boutons))
 </script>
 <style scoped>
 .deplacable {
