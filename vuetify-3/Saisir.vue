@@ -4,16 +4,19 @@
     <slot></slot>
     <v-combobox v-bind="$attrs" v-if="control == 'combobox'"></v-combobox>
     <v-text-field v-bind="$attrs" v-if="control == 'textfield'"></v-text-field>
+    <v-text-field v-bind="$attrs" v-if="control == 'search'" prepend-inner-icon="mdi-magnify"></v-text-field>
     <v-select v-bind="$attrs" v-if="control == 'select'"></v-select>
     <v-textarea v-bind="$attrs" v-if="control == 'textarea'"></v-textarea>
     <Saisirdate v-bind="$attrs" v-if="control == 'date'"></Saisirdate>
   </div>
 </template>
 <script lang="ts" setup>
+import type { PropType } from 'vue'
+
 defineOptions({
   inheritAttrs: false
 })
-import Saisirdate from '@/components/SaisirDate.vue'
+import Saisirdate from './SaisirDate.vue'
 
 defineProps({
   label: {
@@ -25,7 +28,7 @@ defineProps({
     required: false,
     default: 200
   },
-  control: String,
+  control: String as PropType<'combobox' | 'textfield' | 'search' | 'textarea' | 'date' | 'select'>,
   labelBold: { type: Boolean, default: false },
   separateur: { type: Boolean, default: false }
 })
