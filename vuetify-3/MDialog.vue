@@ -3,9 +3,13 @@
     <div v-if="estActive" disabled
       style="position: fixed; left: 0; right: 0; top: 0; bottom: 0; background-color: #000; opacity: 0.2"
       :style="{ 'z-index': zindex }" @click="onClickOut"></div>
-    <div v-if="estActive" class="elevation-6" style="position: fixed"
-      :style="{ 'z-index': zindex + 1, width: width + 'px', height: pageHeight, left: left + 'px', top: top + 'px' }"
-      :id="unique_id">
+    <div v-if="estActive" class="elevation-6" style="position: fixed" :style="{
+      'z-index': zindex + 1,
+      width: pageWidth,
+      height: pageHeight,
+      left: left + 'px',
+      top: top + 'px',
+    }" :id="unique_id">
       <div style="display: flex; flex-direction: column; height: 100%">
         <v-toolbar class="shrink deplacable" :color="couleurTitre" :light="themeTitre == 'light'"
           :dark="themeTitre == 'dark'" density="compact" @mousedown="handleMouseDown">
@@ -20,13 +24,13 @@
         </div>
         <template v-if="m_btns.valider || m_btns.annuler || m_btns.supprimer">
           <div class="shrink pa-2 d-flex dlg-actions" :class="couleur">
-            <v-btn variant="tonal" class="mx-1" color="red" v-if="m_btns.supprimer" @click="onSupprimer"
+            <v-btn variant="tonal" class="mx-1" rounded color="red" v-if="m_btns.supprimer" @click="onSupprimer"
               :disabled="!m_btns.supprimer.actif"><v-icon>mdi-delete-outline</v-icon>{{ m_btns.supprimer.texte
               }}</v-btn>
             <v-spacer></v-spacer>
-            <v-btn class="mx-1" variant="flat" color="grey-lighten-2" v-if="m_btns.annuler" @click="onFermer"
+            <v-btn class="mx-1" variant="flat" rounded color="grey-lighten-2" v-if="m_btns.annuler" @click="onFermer"
               :disabled="!m_btns.annuler.actif">{{ m_btns.annuler.texte }}</v-btn>
-            <v-btn class="mx-1" variant="flat" color="primary" v-if="m_btns.valider" @click="onValider"
+            <v-btn class="mx-1" variant="flat" rounded color="primary" v-if="m_btns.valider" @click="onValider"
               :disabled="!m_btns.valider.actif">{{ m_btns.valider.texte }}</v-btn>
           </div>
         </template>
@@ -35,10 +39,12 @@
   </div>
 </template>
 <script lang="ts" setup>
-import type { PropType } from 'vue'
-import { ref, onMounted, watch, useAttrs } from 'vue'
+import { PropType, ref, onMounted, watch, useAttrs, computed } from 'vue'
 
 const estActive = defineModel({ type: Boolean })
+defineOptions({
+  inheritAttrs: false
+})
 
 const pileFenetres = [] as string[]
 type Bouton = {
@@ -66,6 +72,10 @@ const props = defineProps({
     type: Number,
     default: 900
   },
+  height: {
+    type: Number,
+    default: -1
+  },
   couleur: {
     type: String,
     default: 'bg-grey-lighten-4'
@@ -85,7 +95,8 @@ const attrs = useAttrs()
 
 // ---------data--------------
 const zindex = ref(1005)
-const pageHeight = ref(attrs['height'] ? attrs['height'] + 'px' : 'inherit')
+const pageWidth = computed(() => { return props.width > -1 ? props.width + 'px' : 'auto' })
+const pageHeight = computed(() => { return props.height > -1 ? props.height + 'px' : 'auto' })
 const left = ref(100)
 const top = ref(100)
 const unique_id = `${new Date().getTime()}-${Math.random().toString(36).substring(7)}`
