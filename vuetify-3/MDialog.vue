@@ -9,7 +9,7 @@
       height: pageHeight,
       left: left + 'px',
       top: top + 'px',
-    }" :id="unique_id">
+    }" :id="unique_id" v-bind="$attrs">
       <div style="display: flex; flex-direction: column; height: 100%">
         <v-toolbar class="shrink deplacable" :color="couleurTitre" :light="themeTitre == 'light'"
           :dark="themeTitre == 'dark'" density="compact" @mousedown="handleMouseDown">
@@ -39,7 +39,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { PropType, ref, onMounted, watch, useAttrs, computed } from 'vue'
+import type { PropType } from 'vue'
+import { ref, onMounted, watch, useAttrs, computed } from 'vue'
 
 const estActive = defineModel({ type: Boolean })
 defineOptions({
