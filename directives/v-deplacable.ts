@@ -1,5 +1,5 @@
 export default {
-  mounted(el: any) {
+  mounted(el: HTMLElement) {
     let xdown = 0
     let ydown = 0
     let element: HTMLElement = el
@@ -26,10 +26,12 @@ export default {
         ydown = e.screenY
       }
     }
+
     el.addEventListener('mousedown', cliqueSouris)
-    el._cleanup = () => el.removeEventListener('mousedown', cliqueSouris);
-  },
+    el.addEventListener('mouseleave', relachementSouris)
+    },
   beforeUnmount(el: any) {
-    el._cleanup && el._cleanup();
+    el.removeEventListener('mousedown',()=>{})
+    el.removeEventListener('mouseleave',()=>{})
   },
 }
