@@ -1,24 +1,25 @@
 <template>
   <div>
     <div v-if="modelValue" disabled style="position: fixed; left: 0; right: 0; top: 0; bottom: 0; background-color: #000; opacity: 0.2" :style="{ 'z-index': zindex }" @click="onClickOut"></div>
-    <div v-if="modelValue" class="elevation-6" style="position: fixed" :style="{ 'z-index': zindex + 1, width: width + 'px', height: pageHeight, left: left + 'px', top: top + 'px' }" :id="unique_id">
+    <div v-if="modelValue" class="elevation-5" style="position: fixed;border-radius: 8px;" :style="{ 'z-index': zindex + 1, width: width + 'px', height: pageHeight, left: left + 'px', top: top + 'px' }" :id="unique_id">
       <div style="display: flex; flex-direction: column; height: 100%">
-        <v-toolbar class="shrink deplacable" :color="couleurTitre" :light="themeTitre == 'light'" :dark="themeTitre == 'dark'" dense flat @mousedown="handleMouseDown">
+        <v-toolbar class="shrink rounded-t-lg deplacable" :color="couleurTitre" :light="themeTitre == 'light'" :dark="themeTitre == 'dark'" dense flat @mousedown="handleMouseDown">
           <v-toolbar-title class="text-center" style="width: 100%">{{ titre }}</v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn icon @click="onFermer"><v-icon>mdi-close</v-icon></v-btn>
         </v-toolbar>
-        <div class="modal-body grow" :class="[couleur]" style="overflow: auto">
-          <div class="fill-height" :class="defaultpadding"><slot></slot></div>
+        <div class="modal-body fill-height" :class="[couleur]" style="overflow: auto">
+          <div :class="defaultpadding"><slot></slot></div>
         </div>
-        <template v-if="m_btns.valider || m_btns.annuler || m_btns.supprimer">
-          <div class="shrink pa-2 d-flex dlg-actions" :class="couleur">
+        <div class="shrink rounded-b-lg pa-2 d-flex dlg-actions" :class="couleur">
+          <slot name="actions"></slot>
+          <template v-if="m_btns.valider || m_btns.annuler || m_btns.supprimer">
             <v-btn rounded depressed class="mx-1 grey lighten-3 red--text" v-if="m_btns.supprimer" @click="onSupprimer" :disabled="!m_btns.supprimer.actif"><v-icon>mdi-delete-outline</v-icon>{{ m_btns.supprimer.texte }}</v-btn>
             <v-spacer></v-spacer>
             <v-btn class="mx-1" rounded depressed color="grey lighten-2" v-if="m_btns.annuler" @click="onFermer" :disabled="!m_btns.annuler.actif">{{ m_btns.annuler.texte }}</v-btn>
             <v-btn class="mx-1" rounded depressed color="primary" v-if="m_btns.valider" @click="onValider" :disabled="!m_btns.valider.actif">{{ m_btns.valider.texte }}</v-btn>
-          </div>
-        </template>
+          </template>
+        </div>
       </div>
     </div>
   </div>
