@@ -97,14 +97,7 @@ var MDialog = Vue.extend({
       }
     },
     boutons() {
-      if (Array.isArray(this.boutons)) {
-        this.m_btns = {}
-        if (this.boutons.includes('valider')) this.m_btns['valider'] = { texte: '✔Valider', actif: true }
-        if (this.boutons.includes('annuler')) this.m_btns['annuler'] = { texte: '✘Annuler', actif: true }
-        if (this.boutons.includes('supprimer')) this.m_btns['supprimer'] = { texte: 'Supprimer', actif: true }
-      } else if (this.boutons) {
-        this.m_btns = this.boutons
-      }
+      this.majBtns()
     }
   },
   methods: {
@@ -120,6 +113,16 @@ var MDialog = Vue.extend({
     onClickOut() {
       if ('persistent' in this.$attrs) return
       this.onFermer()
+    },
+    majBtns() {
+      if (Array.isArray(this.boutons)) {
+        this.m_btns = {}
+        if (this.boutons.includes('valider')) this.m_btns['valider'] = { texte: '✔Valider', actif: true }
+        if (this.boutons.includes('annuler')) this.m_btns['annuler'] = { texte: '✘Annuler', actif: true }
+        if (this.boutons.includes('supprimer')) this.m_btns['supprimer'] = { texte: 'Supprimer', actif: true }
+      } else if (this.boutons) {
+        this.m_btns = { ...this.boutons }
+      }
     },
     handleMouseDown(e: MouseEvent) {
       // To prevent selection while moving cursor
@@ -173,6 +176,10 @@ var MDialog = Vue.extend({
     const vnode = document.body
     const rect = vnode.getBoundingClientRect()
     this.maxHeight = rect.height - 100
+    if (Array.isArray(this.boutons) && this.boutons.length == 0) {
+      this.m_btns = {}
+    }
+    this.majBtns()
     this.centrer()
   }
 })
