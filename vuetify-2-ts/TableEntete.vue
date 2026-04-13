@@ -1,110 +1,98 @@
+<template inheritsAttr="false">
+  <tr class="table-entete" v-bind="$attrs">
+    <table-colonne v-for="(col, l) in colonnes" :key="l" @trier="trier" v-model="colonnes[l]" :numero="l" class="grey lighten-3" :class="colClass(col)"> </table-colonne>
+  </tr>
+</template>
+<script setup lang="ts">
+import { ref, defineProps, defineEmits, defineComponent, watch } from 'vue'
+import type { PropType } from 'vue'
+import type { Colonne } from './TableEntete'
+import TableColonne from './TableColonne.vue'
+
+defineComponent({
+  name: 'TableEntete',
+  inheritAttrs: false
+})
+const props = defineProps({
+  value: {
+    type: Array as PropType<Colonne[]>,
+    default: () => {
+      return []
+    }
+  },
+  sticky: { type: Boolean, default: false }
+})
+const emit = defineEmits(['trier', 'selectionnerTout', 'largeurColonne', 'update'])
+let colonnes = ref<Colonne[]>(props.value)
+
+/*--------Data-----------*/
+let colonneATrier = -1
+let ordreCroissant = ref(true)
+let selectionnerToutInterne = ref(false)
+
+/*--------Methods-----------*/
+function trier(col: number) {
+  if (colonneATrier == col) {
+    ordreCroissant.value = !ordreCroissant.value
+  } else {
+    ordreCroissant.value = true
+  }
+  if (colonneATrier > -1) {
+    colonnes.value[colonneATrier].sel = false
+  }
+  colonneATrier = col
+  colonnes.value[colonneATrier].sel = true
+  emit('update', colonnes)
+  emit('trier', col, ordreCroissant.value, colonnes.value)
+}
+function colClass(c: Colonne): string {
+  let cl = ''
+  if (c.classe) cl += c.classe
+  if (props.sticky) cl += ' sticky'
+  return cl
+}
+
+watch(
+  () => props.value,
+  () => {
+    colonnes.value = props.value
+  }
+)
+</script>
+
+<style scoped>
+.table-entete th {
+  padding: 4px 0px;
+}
+
+.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+</style>
 <!--
   ** usage **
 
 <template>
-  <TableEntete :headers="colonnes" sticky v-on:trier="onTrierColonne" v-on:selectionnerTout="selectionner"></TableEntete>
+  <TableEntete v-model="colonnes" sticky v-on:trier="onTrierColonne" v-on:selectionnerTout="selectionner"></TableEntete>
 </template>
-<script lang="ts">
-  import TableEntete, { Colonne } from '../components/TableEntete.vue'
+<script lang="ts" setup>
+import TableEntete from '../components/TableEntete.vue'
+import { Colonne, comparerColonnes } from '../components/TableEntete'
 
-  data(){
-    lignes: [{coulee_date:'2023-12-02','coulee_num':'123456'},{...}]
-    colonnes = [
-      {text:'Date de coulée',width:200,value:'coulee_date',type:'date',sortable:true},
-      {text:'Numéro coulée',width:100,value:'coulee_num',type:'number',sortable:true},
-      {...}
-    ]
-  }
-  methods: {
-    onTrierColonne(ncol: number,croissant:boolean): void {
-      this.lignes.sort((a: any, b: any) => {
-        return comparerColonnes(this.colonnes, ncol, croissant, a, b)
-      })
-    }
-  }
+let lignes: ref([{coulee_date:'2023-12-02','coulee_num':'123456'},{...}])
+let colonnes = [
+  {texte:'Date de coulée',lg:200,valeur:'coulee_date',type:'date',triable:true},
+  {texte:'Numéro coulée',lg:100,valeur:'coulee_num',type:'number',triable:true},
+  {...}
+]
+function onTrierColonne(ncol: number,croissant:boolean): void {
+  this.lignes.value.sort((a: any, b: any) => {
+    return comparerColonnes(colonnes, ncol, croissant, a, b)
+  })
+}
+
 </script>
 -->
-
-<template>
-  <thead>
-    <tr class="table-entete" v-bind="$attrs">
-      <th v-for="(h, l) in headers" :key="l" :width="h.width" class="curseur" :class="colClass(h)" :style="{ 'text-align': h.type == 'number' ? 'right' : 'left' }" @click.stop="trier(l, h.sortable)">
-        <span v-html="h.text" />
-        <v-icon v-if="h.sortable" class="icontrier" :class="{ visible: colonneATrier == l, 'mdi-flip-v': !ordreCroissant }">mdi-menu-down</v-icon>
-        <v-simple-checkbox style="float: right" v-if="h.selectAll" v-model="selectionnerToutInterne" @input="selectionnerTout"></v-simple-checkbox>
-      </th>
-    </tr>
-  </thead>
-</template>
-
-<script lang="ts">
-import Vue, { PropType } from 'vue'
-import { Ripple } from 'vuetify/lib/directives'
-
-export type Colonne = { text: string; value: string; type?: string; width: number; sortable?: boolean; selectAll?: boolean; color?: string }
-
-export default Vue.extend({
-  name: 'TableEntete',
-  props: {
-    headers: {
-      type: Array as PropType<Colonne[]>,
-      default: () => [] as Colonne[]
-    },
-    sticky: { type: Boolean, default: false }
-  },
-  directives: { Ripple },
-  data() {
-    return {
-      colonneATrier: -1,
-      ordreCroissant: true,
-      selectionnerToutInterne: false
-    }
-  },
-  methods: {
-    trier(col: number, sortable: boolean | undefined) {
-      if (sortable) {
-        if (this.colonneATrier == col) {
-          this.ordreCroissant = !this.ordreCroissant
-        } else {
-          this.ordreCroissant = true
-        }
-        this.colonneATrier = col
-        this.$emit('trier', col, this.ordreCroissant, this.headers)
-      }
-    },
-    selectionnerTout() {
-      this.$emit('selectionnerTout', this.selectionnerToutInterne)
-    },
-    reset() {
-      this.colonneATrier = -1
-    },
-    colClass(c: Colonne) {
-      let cl = ''
-      if (c.color) cl += c.color
-      if (this.sticky) cl += ' sticky'
-      return cl
-    }
-  }
-})
-</script>
-<style scoped>
-.table-entete th {
-  padding: 6px 4px;
-}
-.curseur {
-  cursor: pointer;
-}
-.icontrier {
-  opacity: 0;
-}
-th:hover .icontrier,
-.icontrier.visible {
-  opacity: 1;
-}
-.sticky {
-  position: sticky;
-  top: 0;
-  background-color: #f8f8f8;
-  z-index: 5;
-}
-</style>
