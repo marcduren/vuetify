@@ -1,99 +1,136 @@
 <template>
-  <!--
-  <Saisirdate label="Du" v-model="jour"></Saisirdate>
-  -->
-  <div class="d-flex">
-    <v-text-field v-bind:value="datefr" v-on:input="onDate($event)" @click:append="menu = true" v-bind="$attrs" append-icon="mdi-calendar"></v-text-field>
-    <v-menu v-model="menu" :close-on-content-click="false" :nudge-right="5" transition="none" offset-x :max-width="width" :min-width="width">
-      <template v-slot:activator="{ on }">
-        <div v-on="on"></div>
+  <div :style="{ width: width + 'px' }" :class="{ separateur: separateur }">
+    <v-menu v-model="pickerVisible" :close-on-content-click="false" :nudge-right="5" transition="none" offset-y :max-width="pickerWidth" :min-width="pickerWidth">
+      <template v-slot:activator="{}">
+        <v-text-field v-bind="$attrs" v-model="dateInterne" v-on="listeners" @click:append="afficherPicker" append-icon="mdi-calendar" @change="validerDateTexte"></v-text-field>
       </template>
-      <v-date-picker v-model="sdate" locale="fr" first-day-of-week="1" @click:append="menu = true" show-adjacent-months>
+      <v-date-picker v-model="dateISO" locale="fr" first-day-of-week="1" show-adjacent-months>
         <v-spacer></v-spacer>
-        <v-btn text color="primary" @click="menu = false"> Annuler </v-btn>
-        <v-btn text color="primary" @click="onPicker"> OK </v-btn>
+        <v-btn text color="primary" @click="pickerVisible = false"> Annuler </v-btn>
+        <v-btn text color="primary" @click="validerDate"> OK </v-btn>
       </v-date-picker>
     </v-menu>
   </div>
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import Sizeable from '../../node_modules/vuetify/src/mixins/sizeable'
 
 export default Vue.extend({
   name: 'SaisirDate',
-  mixins: [Sizeable],
-  data: () => ({
-    menu: false,
-    sdate: '',
-    datefr: '',
-    erreur: false
-  }),
-  created() {
-    this.sdate = this.value
-    if (this.value) {
-      const [year, month, day] = this.value.split('-')
-      this.datefr = `${day}/${month}/${year}`
-    }
-  },
-  watch: {
-    value() {
-      this.sdate = this.value
-      this.toFrench()
-    }
-  },
+  inheritAttrs: false,
   props: {
+    width: {
+      type: [Number, String],
+      required: false,
+      default: 150
+    },
+    pickerWidth: {
+      type: [Number, String],
+      required: false,
+      default: 290
+    },
+    labelBold: Boolean,
+    separateur: Boolean,
     value: {
       type: String,
       default: null
-    },
-    width: {
-      type: Number,
-      default: 290
     },
     icon: {
       type: String,
       default: 'mdi-calendar-edit'
     }
   },
-  methods: {
-    toFrench() {
-      if (this.sdate == null) {
-        return ''
-      }
-      const [year, month, day] = this.sdate.split('-')
-      this.datefr = `${day}/${month}/${year}`
-    },
-    onDate(dte: string) {
-      if (dte > '') {
-        const [day, month, year] = dte.split('/')
-        var s = `${year}-${month}-${day}`
-        var d = Date.parse(s)
-        if (!isNaN(d)) {
-          if (s != this.sdate) {
-            this.$emit('input', s)
-          }
-          this.sdate = s
-          this.datefr = dte
-          this.erreur = false
-        } else {
-          this.erreur = true
+  data: () => ({
+    pickerVisible: false,
+    dateInterne: '', // date jj/mm/aaaa
+    dateISO: '', // yyy-mm-dd
+    erreur: false
+  }),
+  watch: {
+    value() {
+      if (typeof this.value === 'string' && this.value.includes('-')) {
+        const [year, month, day] = this.value.split('-').map((item) => parseInt(item))
+        if (day > 0 && month > 0 && year > 0) {
+          this.dateInterne = `${day}/${month}/${year}`
+          this.defDateISO(this.dateInterne || '', true)
         }
       } else {
-        if (this.sdate != '') {
-          this.$emit('input', '')
+        this.dateInterne = this.value || ''
+        this.defDateISO(this.dateInterne, true)
+      }
+    },
+    dateInterne() {
+      const datep = this.dateISO
+      this.defDateISO(this.dateInterne || '', true)
+      if (datep != this.dateISO) {
+        this.$emit('input', this.dateISO)
+      }
+    }
+  },
+  computed: {
+    listeners() {
+      // répond aux évènements du parent , supprime @change et @input
+      const l = { ...this.$listeners }
+      delete l.input
+      delete l.change
+      return l
+    }
+  },
+  methods: {
+    afficherPicker() {
+      if (!this.$attrs.readonly) {
+        this.defDateISO(this.dateInterne || '', true)
+        this.pickerVisible = true
+      }
+    },
+    validerDate() {
+      this.pickerVisible = false
+      this.$emit('input', this.dateISO)
+      this.$emit('change', this.dateISO)
+      const [year, month, day] = this.dateISO.split('-')
+      this.dateInterne = `${day}/${month}/${year}`
+    },
+    validerDateTexte() {
+      this.defDateISO(this.dateInterne || '', true)
+      this.$emit('change', this.dateISO)
+    },
+    effacerDate() {
+      this.dateInterne = ''
+      this.dateISO = ''
+      this.$emit('input', this.dateISO)
+    },
+    defDateISO(dte: string, formatStrict: boolean) {
+      if (dte == '' || dte === null) {
+        this.dateISO = ''
+        return ''
+      }
+      const [day, month, year] = dte.split('/').map((item) => parseInt(item))
+      if (day > 0 && month > 0 && year > 0) {
+        if (formatStrict) {
+          const mm = (month < 10 ? '0' : '') + month
+          const dd = (day < 10 ? '0' : '') + day
+          this.dateISO = `${year}-${mm}-${dd}`
+        } else {
+          this.dateISO = `${year}-${month}-${day}`
         }
       }
     },
-    onPicker() {
-      this.menu = false
-      this.toFrench()
-      this.$emit('input', this.sdate)
-    },
-    clearDate() {
-      this.sdate = ''
-      this.$emit('input', this.sdate)
+    majDates() {
+      if (typeof this.value === 'string') {
+        const [year, month, day] = this.value.split('-').map((item) => parseInt(item))
+        if (day > 0 && month > 0 && year > 0) {
+          this.dateISO = `${year}-${month}-${day}`
+          this.dateInterne = `${day}/${month}/${year}`
+        }
+      }
+      if (this.value === null) {
+        this.dateISO = ''
+        this.dateInterne = ''
+      }
     }
+  },
+  mounted() {
+    this.majDates()
   }
 })
 </script>
